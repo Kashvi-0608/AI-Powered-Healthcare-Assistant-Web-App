@@ -1,57 +1,40 @@
-# AI-Powered Healthcare Assistant
+# Sehat Sathi — Setup Guide
 
-### Making Medical Reports Accessible for Everyone
+## Ek baar setup (5 minute)
 
-AI-Powered Healthcare Assistant is a web-based solution designed to help users understand complex medical reports in simple and accessible language.
+1. **API key lo:** https://console.anthropic.com → API Keys → Create Key
 
-## 💡 Problem
+2. **`.env` file banao** is folder mein (`.env.example` ko copy karke rename karo `.env`):
+   ```
+   ANTHROPIC_API_KEY=sk-ant-yahan-apni-key-paste-karo
+   PORT=3001
+   ```
 
-Medical reports often contain complex medical terminology that can be difficult for patients, elderly users, and people with limited healthcare literacy to understand.
+3. **Dependencies install karo:**
+   ```
+   npm install
+   ```
 
-## 🚀 Our Solution
+## Har baar chalane ke liye (2 terminal chahiye)
 
-Our solution uses AI to analyze uploaded medical reports and convert complex medical information into easy-to-understand explanations.
+**Terminal 1 — Backend start karo:**
+```
+npm start
+```
+Ye dikhna chahiye: `✅ Sehat Sathi backend running at http://localhost:3001`
 
-### Key Features
+**Terminal 2 — Frontend kholo:**
+- VS Code mein `frontend.html` pe right-click → "Open with Live Server"
+- Ya seedha `frontend.html` ko double-click karke browser mein kholo
 
-- 📄 Upload medical reports in image/PDF format
-- 🤖 AI-powered report analysis
-- 🧠 Extraction of important medical information
-- 💬 Simple-language explanations
-- 🔊 Voice-based support for better accessibility
-- ⚡ Quick and user-friendly results
+⚠️ **Important:** Backend (Terminal 1) hamesha chalta rehna chahiye jab tak app use kar rahe ho. Agar band kar diya, "Explain My Report" kaam nahi karega.
 
-## 🔄 Working Flow
+## Agar mic chahiye
 
-Upload Report → AI Processing → Data Extraction → Result Display → Voice Support
+Mic sirf HTTPS ya localhost pe kaam karta hai. Isliye:
+- `frontend.html` ko VS Code Live Server se hi kholo (wo localhost use karta hai) — **file ko direct double-click mat karo**
+- Ya Netlify pe deploy karo (tab backend bhi wahin deploy karna hoga — demo ke liye VS Code Live Server hi sabse aasan hai)
 
-## 🎯 Target Users
+## Demo ke time
 
-- Patients
-- Elderly users
-- People with limited healthcare literacy
-- Users who find medical terminology difficult to understand
-
-## 🛠️ Technology
-
-- AI / Machine Learning
-- OCR
-- NLP
-- HTML
-- CSS
-- JavaScript
-
-## 👩‍💻 Team
-
-**Team Name:** Logic Loop
-
-**Team Leader:** Kashvi Goel  
-**Team Member:** Varshika Choudhary
-
-## 📌 Project Status
-
-Hackathon Prototype
-
-## ⚠️ Disclaimer
-
-This project is intended to help users understand medical reports and is not a replacement for professional medical advice.
+- Agar internet slow ho ya API fail ho jaye, "Try a sample" buttons use karo — wo bina internet ke bhi kaam karte hain (built-in demo data)
