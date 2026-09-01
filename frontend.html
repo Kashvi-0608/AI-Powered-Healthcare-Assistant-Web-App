@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sehat Sathi — AI Health Report Assistant</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #F4F8F7;
+    --panel: #FFFFFF;
+    --ink: #16302C;
+    --ink-soft: #4B655F;
+    --teal-deep: #10534A;
+    --teal: #1C7A6B;
+    --teal-soft: #E4F1EE;
+    --coral: #E86A4D;
+    --coral-soft: #FCE6DF;
+    --line: #DCE8E4;
+    --gold: #D9A441;
+    --radius: 18px;
+    --shadow: 0 10px 30px -12px rgba(16,83,74,0.18);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background: var(--bg);
+    background-image:
+      radial-gradient(circle at 8% 8%, rgba(28,122,107,0.06), transparent 40%),
+      radial-gradient(circle at 95% 15%, rgba(232,106,77,0.06), transparent 35%);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    min-height:100vh;
+  }
+  .wrap{ max-width: 880px; margin: 0 auto; padding: 28px 20px 80px; }
+
+  header.top{
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom: 28px;
+  }
+  .brand{ display:flex; align-items:center; gap:12px; }
+  .brand .mark{
+    width:42px;height:42px;border-radius:12px;
+    background: linear-gradient(155deg, var(--teal), var(--teal-deep));
+    display:flex;align-items:center;justify-content:center;
+    color:white; font-family:'Fraunces',serif; font-weight:700; font-size:20px;
+    box-shadow: var(--shadow);
+  }
+  .brand-text .name{ font-family:'Fraunces',serif; font-weight:600; font-size:19px; line-height:1.1; }
+  .brand-text .tag{ font-size:12px; color: var(--ink-soft); }
+
+  .pill{
+    font-size:12px; font-weight:600; color: var(--teal-deep);
+    background: var(--teal-soft); border:1px solid var(--line);
+    padding:6px 12px; border-radius:100px;
+  }
+
+  .hero{ text-align:center; margin: 8px 0 34px; }
+  .hero h1{
+    font-family:'Fraunces',serif; font-weight:600; font-size: clamp(28px,4vw,40px);
+    line-height:1.15; margin:0 0 10px;
+  }
+  .hero h1 em{ font-style:normal; color: var(--teal); }
+  .hero p{ color: var(--ink-soft); font-size:15.5px; max-width:480px; margin:0 auto; }
+
+  /* SCREENS */
+  .screen{ display:none; }
+  .screen.active{ display:block; animation: fadeUp .45s ease; }
+  @keyframes fadeUp{ from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
+
+  /* UPLOAD */
+  .dropzone{
+    background: var(--panel);
+    border: 2px dashed var(--line);
+    border-radius: var(--radius);
+    padding: 46px 24px;
+    text-align:center;
+    cursor:pointer;
+    transition: border-color .2s, background .2s;
+    box-shadow: var(--shadow);
+  }
+  .dropzone.drag{ border-color: var(--teal); background: var(--teal-soft); }
+  .dropzone .icon{
+    width:64px;height:64px; margin:0 auto 16px; border-radius:50%;
+    background: var(--teal-soft); display:flex;align-items:center;justify-content:center;
+    color: var(--teal-deep);
+  }
+  .dropzone h3{ font-family:'Fraunces',serif; font-weight:600; margin:0 0 6px; font-size:19px;}
+  .dropzone p{ color:var(--ink-soft); font-size:14px; margin:0 0 18px;}
+  .btn{
+    font-family:'Inter',sans-serif; font-weight:700; font-size:14.5px;
+    border:none; border-radius:12px; padding:13px 26px; cursor:pointer;
+    display:inline-flex; align-items:center; gap:8px;
+    transition: transform .15s, box-shadow .15s;
+  }
+  .btn:active{ transform: scale(0.97); }
+  .btn-primary{ background: var(--coral); color:white; box-shadow: 0 8px 20px -8px rgba(232,106,77,0.55); }
+  .btn-primary:hover{ box-shadow: 0 10px 24px -6px rgba(232,106,77,0.6); }
+  .btn-primary:disabled{ opacity:.5; cursor:not-allowed; box-shadow:none; }
+  .btn-ghost{ background: var(--teal-soft); color: var(--teal-deep); }
+  .btn-outline{ background:white; color:var(--teal-deep); border:1.5px solid var(--line); }
+  #fileInput{ display:none; }
+
+  .preview-card{
+    background: var(--panel); border-radius: var(--radius); box-shadow: var(--shadow);
+    padding: 20px; margin-top:18px; display:flex; gap:16px; align-items:center;
+  }
+  .preview-card img{ width:76px;height:76px; object-fit:cover; border-radius:12px; border:1px solid var(--line); }
+  .preview-info{ flex:1; }
+  .preview-info .fname{ font-weight:700; font-size:14.5px; }
+  .preview-info .fsize{ font-size:12.5px; color:var(--ink-soft); }
+
+  .sample-row{ display:flex; gap:10px; justify-content:center; margin-top:16px; flex-wrap:wrap;}
+  .sample-chip{
+    font-size:13px; font-weight:600; color:var(--teal-deep); background:white;
+    border:1px solid var(--line); padding:8px 14px; border-radius:100px; cursor:pointer;
+  }
+  .sample-chip:hover{ border-color: var(--teal); }
+
+  .cta-row{ text-align:center; margin-top:24px; }
+
+  /* LOADING */
+  .loading-box{
+    background: var(--panel); border-radius: var(--radius); box-shadow: var(--shadow);
+    padding: 50px 24px; text-align:center;
+  }
+  .spinner{
+    width:56px;height:56px; border-radius:50%;
+    border: 5px solid var(--teal-soft); border-top-color: var(--teal);
+    margin: 0 auto 22px; animation: spin 0.9s linear infinite;
+  }
+  @keyframes spin{ to{ transform: rotate(360deg); } }
+  .loading-box h3{ font-family:'Fraunces',serif; font-size:19px; margin:0 0 6px; }
+  .loading-box p{ color:var(--ink-soft); font-size:14px; }
+  .steps-mini{ display:flex; justify-content:center; gap:22px; margin-top:26px; flex-wrap:wrap;}
+  .step-mini{ font-size:12px; color:var(--ink-soft); display:flex; flex-direction:column; align-items:center; gap:6px; }
+  .step-mini .dot{ width:10px;height:10px;border-radius:50%; background:var(--line); }
+  .step-mini.done .dot{ background: var(--teal); }
+
+  /* RESULTS */
+  .result-header{
+    display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; gap:12px; flex-wrap:wrap;
+  }
+  .result-header h2{ font-family:'Fraunces',serif; font-size:22px; margin:0; }
+  .voice-controls{ display:flex; gap:8px; }
+  .icon-btn{
+    width:42px;height:42px; border-radius:12px; border:1.5px solid var(--line); background:white;
+    display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--teal-deep);
+    transition: background .15s;
+  }
+  .icon-btn.active{ background:var(--coral); color:white; border-color:var(--coral); }
+  .icon-btn:hover{ background: var(--teal-soft); }
+
+  .card{
+    background: var(--panel); border-radius: var(--radius); box-shadow: var(--shadow);
+    padding: 22px; margin-bottom: 16px; border-left: 5px solid var(--teal);
+  }
+  .card.warn{ border-left-color: var(--coral); }
+  .card .card-label{
+    font-size:11.5px; font-weight:800; text-transform:uppercase; letter-spacing:.06em;
+    color: var(--teal); margin-bottom:8px; display:flex; align-items:center; gap:6px;
+  }
+  .card.warn .card-label{ color: var(--coral); }
+  .card h3{ font-family:'Fraunces',serif; font-size:18px; margin:0 0 8px; }
+  .card p{ margin:0; color: var(--ink); font-size:14.5px; line-height:1.6; }
+
+  .med-grid{ display:grid; grid-template-columns: repeat(auto-fit, minmax(230px,1fr)); gap:14px; margin-top: 6px;}
+  .med-card{
+    background: var(--panel); border-radius: 14px; padding:16px; box-shadow: var(--shadow);
+    border: 1px solid var(--line);
+  }
+  .med-card .med-name{ font-weight:800; font-size:15px; margin-bottom:6px; color: var(--teal-deep); }
+  .med-row{ font-size:13px; color: var(--ink-soft); margin-bottom:3px; }
+  .med-row b{ color: var(--ink); font-weight:600; }
+  .med-card .side-effects{
+    margin-top:10px; padding-top:10px; border-top:1px dashed var(--line);
+    font-size:12.5px; color: var(--coral);
+  }
+
+  .ask-box{
+    background: var(--panel); border-radius: var(--radius); box-shadow: var(--shadow);
+    padding: 18px 20px; margin-top: 22px;
+  }
+  .ask-box h4{ font-family:'Fraunces',serif; font-size:16px; margin:0 0 10px; }
+  .ask-row{ display:flex; gap:10px; }
+  .ask-row input{
+    flex:1; border:1.5px solid var(--line); border-radius:12px; padding:12px 14px;
+    font-family:'Inter',sans-serif; font-size:14px; outline:none;
+  }
+  .ask-row input:focus{ border-color: var(--teal); }
+  .mic-btn{
+    width:46px;height:46px; border-radius:12px; border:none; background: var(--teal-soft);
+    color: var(--teal-deep); cursor:pointer; display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;
+  }
+  .mic-btn.listening{ background: var(--coral); color:white; animation: pulse 1s infinite; }
+  @keyframes pulse{ 0%,100%{ box-shadow: 0 0 0 0 rgba(232,106,77,0.4); } 50%{ box-shadow: 0 0 0 8px rgba(232,106,77,0); } }
+  .answer-box{
+    margin-top:12px; padding:14px; background: var(--teal-soft); border-radius:12px;
+    font-size:14px; line-height:1.6; display:none;
+  }
+  .answer-box.show{ display:block; }
+
+  .disclaimer{
+    text-align:center; font-size:12px; color: var(--ink-soft); margin-top:26px;
+    padding-top:16px; border-top:1px solid var(--line);
+  }
+  .reset-row{ text-align:center; margin-top:20px; }
+
+  .err-box{
+    background: var(--coral-soft); border:1px solid var(--coral); border-radius:14px;
+    padding:16px; color:#8a3a26; font-size:13.5px; margin-top:14px; display:none;
+  }
+  .err-box.show{ display:block; }
+
+  @media (max-width:560px){
+    .result-header{ flex-direction:column; align-items:flex-start; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="brand">
+      <div class="mark">S</div>
+      <div class="brand-text">
+        <div class="name">Sehat Sathi</div>
+        <div class="tag">AI Health Report Assistant</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- SCREEN 1: UPLOAD -->
+  <div class="screen active" id="screen-upload">
+    <div class="hero">
+      <h1>Understand your report,<br><em>in plain language.</em></h1>
+      <p>Upload a prescription or medical report — we'll explain it in simple, easy-to-understand terms.</p>
+    </div>
+
+    <div class="dropzone" id="dropzone">
+      <div class="icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M12 16V4M12 4L7 9M12 4L17 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 16V18C4 19.1046 4.89543 20 6 20H18C19.1046 20 20 19.1046 20 18V16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </div>
+      <h3>Upload your report</h3>
+      <p>Prescription, blood test, or lab report photo — JPG, PNG</p>
+      <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">Choose Photo</button>
+      <input type="file" id="fileInput" accept="image/*">
+    </div>
+
+    <div class="preview-card" id="previewCard" style="display:none;">
+      <img id="previewImg" src="" alt="preview">
+      <div class="preview-info">
+        <div class="fname" id="fname">report.jpg</div>
+        <div class="fsize" id="fsize">—</div>
+      </div>
+      <button class="btn-outline btn" style="padding:8px 14px; font-size:13px;" onclick="resetUpload()">Change</button>
+    </div>
+
+    <div class="sample-row" id="sampleRow">
+      <span style="font-size:13px;color:var(--ink-soft);align-self:center;">Try a sample:</span>
+      <div class="sample-chip" onclick="loadSample(1)">💊 Prescription</div>
+      <div class="sample-chip" onclick="loadSample(2)">🩸 Blood Report</div>
+    </div>
+
+    <div class="err-box" id="errBox"></div>
+
+    <div class="cta-row">
+      <button class="btn btn-primary" id="analyzeBtn" disabled onclick="analyzeReport()">
+        Explain My Report →
+      </button>
+    </div>
+  </div>
+
+  <!-- SCREEN 2: LOADING -->
+  <div class="screen" id="screen-loading">
+    <div class="loading-box">
+      <div class="spinner"></div>
+      <h3 id="loadingText">Reading your report...</h3>
+      <p>This will just take a moment — our AI is carefully going through your report</p>
+      <div class="steps-mini">
+        <div class="step-mini" id="step1"><div class="dot"></div>Reading</div>
+        <div class="step-mini" id="step2"><div class="dot"></div>Analyzing</div>
+        <div class="step-mini" id="step3"><div class="dot"></div>Simplifying</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN 3: RESULTS -->
+  <div class="screen" id="screen-results">
+    <div class="result-header">
+      <h2>Your Report Summary</h2>
+      <div class="voice-controls">
+        <button class="icon-btn" id="speakBtn" onclick="toggleSpeak()" title="Listen">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M11 5L6 9H2V15H6L11 19V5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M15.54 8.46C16.4774 9.39764 17.004 10.6692 17.004 11.995C17.004 13.3208 16.4774 14.5924 15.54 15.53" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+        <button class="icon-btn" onclick="resetAll()" title="New report">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M1 4V10H7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.51 15C4.15839 16.8404 5.38734 18.4202 7.01166 19.5014C8.63598 20.5826 10.5677 21.1066 12.5157 20.9945C14.4637 20.8824 16.3226 20.1401 17.8121 18.8798C19.3017 17.6195 20.3413 15.9089 20.7742 14.0064C21.2072 12.104 21.0101 10.111 20.2126 8.32941C19.4152 6.54781 18.0605 5.07235 16.3528 4.12246C14.6451 3.17257 12.6768 2.79891 10.7385 3.05996C8.80017 3.32101 6.99806 4.20293 5.6 5.6L1 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div id="resultsContent"></div>
+
+    <div class="ask-box">
+      <h4>💬 Ask a Question</h4>
+      <div class="ask-row">
+        <input type="text" id="askInput" placeholder="e.g. Do I take this medicine on an empty stomach?">
+        <button class="mic-btn" id="micBtn" onclick="toggleMic()" title="Ask by voice">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 1C10.9 1 10 1.9 10 3V11C10 12.1 10.9 13 12 13C13.1 13 14 12.1 14 11V3C14 1.9 13.1 1 12 1Z" stroke="currentColor" stroke-width="2"/><path d="M19 10V11C19 14.87 15.87 18 12 18C8.13 18 5 14.87 5 11V10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M12 18V22" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+        <button class="btn btn-primary" style="padding:12px 20px;" onclick="askQuestion()">Ask</button>
+      </div>
+      <div class="answer-box" id="answerBox"></div>
+    </div>
+
+    <div class="reset-row">
+      <button class="btn btn-ghost" onclick="resetAll()">+ Upload New Report</button>
+    </div>
+
+    <div class="disclaimer">⚠️ This is an AI-generated summary. Please consult your doctor before making any important decisions.</div>
+  </div>
+
+</div>
+
+<script>
+let uploadedImageBase64 = null;
+let uploadedImageMediaType = null;
+let currentAnalysis = null;
+let isSpeaking = false;
+
+// ---------- Sample data (base64 tiny placeholders swapped for text-based demo mode) ----------
+const SAMPLES = {
+  1: {
+    label: "Sample Prescription",
+    mock: {
+      summary: "Aapko halka bukhar aur gale mein infection hai. Doctor ne antibiotic aur bukhar ki dawai likhi hai. 5 din mein theek ho jana chahiye.",
+      condition: "Upper Respiratory Tract Infection (Gale aur Naak ka Infection)",
+      medicines: [
+        {name: "Amoxicillin 500mg", dosage: "1 capsule, din mein 3 baar", duration: "5 din tak", side_effects: "Halka pet kharab ho sakta hai. Khana khane ke baad lein."},
+        {name: "Paracetamol 650mg", dosage: "1 tablet, bukhar hone par", duration: "Zaroorat padne par", side_effects: "Normally koi side effect nahi. Din mein 4 se zyada na lein."}
+      ],
+      advice: "Zyada paani piyein, aaram karein. Agar 3 din mein bukhar na jaye to doctor se dobara milein."
+    }
+  },
+  2: {
+    label: "Sample Blood Report",
+    mock: {
+      summary: "Aapka overall blood test theek hai, lekin Vitamin D thoda kam hai. Baaki sab values normal range mein hain.",
+      condition: "Vitamin D Deficiency (Halki kami)",
+      medicines: [
+        {name: "Vitamin D3 60000 IU", dosage: "1 sachet, hafte mein 1 baar", duration: "8 hafte tak", side_effects: "Koi major side effect nahi. Dudh ya khane ke saath lein."}
+      ],
+      advice: "Roz 15-20 minute dhoop mein baithein. 2 mahine baad dobara test karayein."
+    }
+  }
+};
+
+let mockMode = false;
+
+// ---------- Upload handling ----------
+const dropzone = document.getElementById('dropzone');
+const fileInput = document.getElementById('fileInput');
+
+dropzone.addEventListener('click', () => fileInput.click());
+dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('drag'); });
+dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag'));
+dropzone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropzone.classList.remove('drag');
+  if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener('change', e => {
+  if (e.target.files.length) handleFile(e.target.files[0]);
+});
+
+function handleFile(file){
+  if (!file.type.startsWith('image/')) {
+    showError("Please upload an image file only (JPG/PNG).");
+    return;
+  }
+  mockMode = false;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    uploadedImageBase64 = e.target.result.split(',')[1];
+    uploadedImageMediaType = file.type;
+    document.getElementById('previewImg').src = e.target.result;
+    document.getElementById('fname').textContent = file.name;
+    document.getElementById('fsize').textContent = (file.size/1024).toFixed(0) + ' KB';
+    document.getElementById('previewCard').style.display = 'flex';
+    document.getElementById('sampleRow').style.display = 'none';
+    document.getElementById('analyzeBtn').disabled = false;
+    hideError();
+  };
+  reader.readAsDataURL(file);
+}
+
+function loadSample(id){
+  mockMode = true;
+  currentSampleId = id;
+  document.getElementById('previewCard').style.display = 'flex';
+  document.getElementById('previewImg').src = "data:image/svg+xml;base64," + btoa(`<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100'><rect width='100' height='100' fill='%23E4F1EE'/></svg>`);
+  document.getElementById('fname').textContent = SAMPLES[id].label;
+  document.getElementById('fsize').textContent = "Demo sample";
+  document.getElementById('analyzeBtn').disabled = false;
+  hideError();
+}
+
+function resetUpload(){
+  uploadedImageBase64 = null;
+  mockMode = false;
+  document.getElementById('previewCard').style.display = 'none';
+  document.getElementById('sampleRow').style.display = 'flex';
+  document.getElementById('analyzeBtn').disabled = true;
+  fileInput.value = '';
+}
+
+function showError(msg){
+  const box = document.getElementById('errBox');
+  box.textContent = msg;
+  box.classList.add('show');
+}
+function hideError(){
+  document.getElementById('errBox').classList.remove('show');
+}
+
+// ---------- Screen switching ----------
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+let currentSampleId = null;
+
+// ---------- Analyze ----------
+async function analyzeReport(){
+  showScreen('screen-loading');
+  animateSteps();
+
+  try{
+    let data;
+    if (mockMode){
+      await new Promise(r => setTimeout(r, 1800));
+      data = SAMPLES[currentSampleId].mock;
+    } else {
+      data = await callClaudeVision(uploadedImageBase64, uploadedImageMediaType);
+    }
+    currentAnalysis = data;
+    renderResults(data);
+    showScreen('screen-results');
+  } catch(err){
+    console.error(err);
+    showScreen('screen-upload');
+    showError("Something went wrong during analysis. Please try again or use a sample. (" + err.message + ")");
+  }
+}
+
+function animateSteps(){
+  document.getElementById('step1').classList.remove('done');
+  document.getElementById('step2').classList.remove('done');
+  document.getElementById('step3').classList.remove('done');
+  setTimeout(()=>document.getElementById('step1').classList.add('done'), 400);
+  setTimeout(()=>document.getElementById('step2').classList.add('done'), 1200);
+  setTimeout(()=>document.getElementById('step3').classList.add('done'), 2000);
+}
+
+// ---------- Backend URL ----------
+const BACKEND_URL = 'http://localhost:3002';
+
+// ---------- Analyze via backend ----------
+async function callClaudeVision(base64, mediaType){
+  const response = await fetch(`${BACKEND_URL}/api/analyze`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ base64, mediaType })
+  });
+
+  const parsed = await response.json();
+
+  if (parsed.error === "not_medical") {
+    throw new Error("This doesn't look like a medical report. Please try a different image.");
+  }
+  if (parsed.error) {
+    throw new Error(parsed.error);
+  }
+  return parsed;
+}
+
+// ---------- Render results ----------
+function renderResults(data){
+  const el = document.getElementById('resultsContent');
+  let medsHtml = '';
+  if (data.medicines && data.medicines.length){
+    medsHtml = `<div class="med-grid">` + data.medicines.map(m => `
+      <div class="med-card">
+        <div class="med-name">💊 ${escapeHtml(m.name)}</div>
+        <div class="med-row"><b>Dosage:</b> ${escapeHtml(m.dosage || '—')}</div>
+        <div class="med-row"><b>Duration:</b> ${escapeHtml(m.duration || '—')}</div>
+        <div class="side-effects">⚠️ ${escapeHtml(m.side_effects || 'Koi major side effect nahi')}</div>
+      </div>
+    `).join('') + `</div>`;
+  }
+
+  el.innerHTML = `
+    <div class="card">
+      <div class="card-label">📋 Summary</div>
+      <p>${escapeHtml(data.summary)}</p>
+    </div>
+    <div class="card">
+      <div class="card-label">🩺 Condition</div>
+      <h3>${escapeHtml(data.condition)}</h3>
+    </div>
+    ${medsHtml}
+    <div class="card warn">
+      <div class="card-label">✅ What To Do Next</div>
+      <p>${escapeHtml(data.advice)}</p>
+    </div>
+  `;
+}
+
+function escapeHtml(str){
+  if (!str) return '';
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+// ---------- Voice: Text to Speech ----------
+let availableVoices = [];
+let voicesReady = false;
+
+function loadVoices(){
+  availableVoices = speechSynthesis.getVoices();
+  if (availableVoices.length) voicesReady = true;
+}
+loadVoices();
+if ('onvoiceschanged' in speechSynthesis){
+  speechSynthesis.onvoiceschanged = loadVoices;
+}
+
+function pickBestVoice(){
+  // Prefer a Hindi voice, else any Indian-English voice, else browser default
+  let v = availableVoices.find(v => v.lang === 'hi-IN');
+  if (!v) v = availableVoices.find(v => v.lang && v.lang.toLowerCase().startsWith('hi'));
+  if (!v) v = availableVoices.find(v => v.lang === 'en-IN');
+  if (!v) v = availableVoices.find(v => v.default);
+  return v || null;
+}
+
+let keepAliveTimer = null;
+
+function toggleSpeak(){
+  const btn = document.getElementById('speakBtn');
+  if (isSpeaking){
+    speechSynthesis.cancel();
+    clearInterval(keepAliveTimer);
+    isSpeaking = false;
+    btn.classList.remove('active');
+    return;
+  }
+  if (!currentAnalysis){
+    showError("Please upload and analyze a report first, then listen.");
+    return;
+  }
+  if (!('speechSynthesis' in window)){
+    alert("Aapka browser voice output support nahi karta. Chrome try karein.");
+    return;
+  }
+
+  let text = currentAnalysis.summary + ". " + currentAnalysis.condition + ". ";
+  (currentAnalysis.medicines || []).forEach(m => {
+    text += m.name + ", " + m.dosage + ". ";
+  });
+  text += currentAnalysis.advice;
+
+  speechSynthesis.cancel(); // clear any stuck queue first
+
+  const speakNow = () => {
+    const utter = new SpeechSynthesisUtterance(text);
+    const voice = pickBestVoice();
+    if (voice) utter.voice = voice;
+    utter.lang = voice ? voice.lang : 'en-IN';
+    utter.rate = 0.95;
+    utter.pitch = 1;
+
+    utter.onend = () => { isSpeaking = false; btn.classList.remove('active'); clearInterval(keepAliveTimer); };
+    utter.onerror = (e) => {
+      isSpeaking = false; btn.classList.remove('active'); clearInterval(keepAliveTimer);
+      console.error('Speech error:', e);
+      showError("Something went wrong playing the voice. Please try again.");
+    };
+
+    speechSynthesis.speak(utter);
+    isSpeaking = true;
+    btn.classList.add('active');
+    hideError();
+
+    // Chrome bug workaround: long utterances can pause/stop after ~15s. Nudge it to keep going.
+    clearInterval(keepAliveTimer);
+    keepAliveTimer = setInterval(() => {
+      if (!speechSynthesis.speaking){ clearInterval(keepAliveTimer); return; }
+      speechSynthesis.pause();
+      speechSynthesis.resume();
+    }, 8000);
+  };
+
+  // If voices haven't loaded yet, wait briefly then speak anyway
+  if (!voicesReady && speechSynthesis.getVoices().length === 0){
+    setTimeout(speakNow, 250);
+  } else {
+    speakNow();
+  }
+}
+
+// ---------- Voice: Speech to Text ----------
+let recognition = null;
+let recognitionActive = false;
+const isSecureCtx = window.isSecureContext; // false on plain file:// or http:// (non-localhost)
+
+if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SR();
+  recognition.lang = 'hi-IN';
+  recognition.interimResults = false;
+  recognition.maxAlternatives = 1;
+
+  recognition.onresult = (e) => {
+    document.getElementById('askInput').value = e.results[0][0].transcript;
+    document.getElementById('micBtn').classList.remove('listening');
+    recognitionActive = false;
+    askQuestion();
+  };
+  recognition.onerror = (e) => {
+    document.getElementById('micBtn').classList.remove('listening');
+    recognitionActive = false;
+    console.error('Speech recognition error:', e.error);
+    if (e.error === 'not-allowed' || e.error === 'service-not-allowed'){
+      showError("Microphone access is blocked. Click the 🔒/mic icon near the browser address bar and select 'Allow', then try again.");
+    } else if (e.error === 'no-speech'){
+      showError("No speech was detected. Please try speaking again.");
+    } else if (e.error === 'network'){
+      showError("Voice input needs an internet connection.");
+    } else {
+      showError("Something went wrong with voice input (" + e.error + "). Please try again.");
+    }
+  };
+  recognition.onend = () => {
+    document.getElementById('micBtn').classList.remove('listening');
+    recognitionActive = false;
+  };
+}
+
+function toggleMic(){
+  if (!recognition){
+    alert("Voice input isn't supported in your browser. Please try Chrome or Edge.");
+    return;
+  }
+  if (!isSecureCtx){
+    showError("Voice input only works over HTTPS or localhost. If you're opening this file directly (file://), please deploy it on Vercel/Netlify or run it via 'localhost' — the mic will work there.");
+    return;
+  }
+  if (recognitionActive) return;
+  hideError();
+  const btn = document.getElementById('micBtn');
+  try{
+    recognition.start();
+    recognitionActive = true;
+    btn.classList.add('listening');
+  } catch(err){
+    console.error(err);
+    showError("Couldn't start the microphone. Please reload the page and try again.");
+  }
+}
+
+// ---------- Follow-up Q&A ----------
+async function askQuestion(){
+  const input = document.getElementById('askInput');
+  const q = input.value.trim();
+  if (!q || !currentAnalysis) return;
+
+  const answerBox = document.getElementById('answerBox');
+  answerBox.textContent = "Thinking...";
+  answerBox.classList.add('show');
+
+  try{
+    const response = await fetch(`${BACKEND_URL}/api/ask`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ context: currentAnalysis, question: q })
+    });
+    const result = await response.json();
+    if (result.error) throw new Error(result.error);
+    answerBox.textContent = result.answer;
+  } catch(err){
+    answerBox.textContent = "Sorry, couldn't get an answer. Please try again.";
+  }
+}
+
+document.getElementById('askInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') askQuestion();
+});
+
+// ---------- Reset ----------
+function resetAll(){
+  speechSynthesis.cancel();
+  isSpeaking = false;
+  uploadedImageBase64 = null;
+  mockMode = false;
+  currentAnalysis = null;
+  document.getElementById('previewCard').style.display = 'none';
+  document.getElementById('sampleRow').style.display = 'flex';
+  document.getElementById('analyzeBtn').disabled = true;
+  document.getElementById('answerBox').classList.remove('show');
+  document.getElementById('askInput').value = '';
+  fileInput.value = '';
+  showScreen('screen-upload');
+}
+</script>
+</body>
+</html>
